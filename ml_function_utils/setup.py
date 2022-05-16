@@ -17,8 +17,8 @@ if __name__ == '__main__':
         install_requires=load_requires_from_file('requirements.txt'),
         author="id",
         author_email="",
-        description="id-ai-function/id_ai_function_utils",
-        long_description="id-ai-function/id_ai_function_utils",
+        description="ml_function/ml_function_utils",
+        long_description="ml_function/ml_function_utils",
         long_description_content_type="text/markdown",
         packages=setuptools.find_packages(),
         classifiers=[
