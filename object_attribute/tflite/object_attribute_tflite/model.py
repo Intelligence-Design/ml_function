@@ -85,13 +85,16 @@ class TfliteModel(BaseModel):
 
         model_input_shape = self.interpreter.get_input_details()[0]['shape']
         resize_input_tensor = self.preprocess(input_tensor, (model_input_shape[1], model_input_shape[2]))
+
         output_tensor_list = []
         for resize_input_image in resize_input_tensor:
             self.__set_input_tensor(resize_input_image)
             self.interpreter.invoke()
             output_tensor = self.__get_output_tensor()
             output_tensor_list.append(output_tensor)
-        result_dto = self.__output_tensor_list2dto(output_tensor_list)
+
+        dto = self.__output_tensor_list2dto(output_tensor_list)
+        return dto
 
     def __set_input_tensor(self, image: np.ndarray):
         input_tensor = self.interpreter.tensor(self.interpreter.get_input_details()[0]['index'])()
@@ -110,8 +113,12 @@ class TfliteModel(BaseModel):
         return output_tensor
 
     def __output_tensor_list2dto(self, output_tensor_list: List[List[np.ndarray]]) -> List[Dict]:
-        example_dto = copy.deepcopy(self.EXAMPLE_DTO)
+        dto = copy.deepcopy(self.meta_dict['output_dto'])
+        for dto_index, dto_elem in enumerate(dto):
+            dto_elem['predicts'] = np.zeros((len(output_tensor_list), *output_tensor_list[0][dto_index].shape[1:]),
+                                            dtype=output_tensor_list[0][dto_index].dtype)
+
         for output_tensor in output_tensor_list:
-            print()
-
-
+            for dto_index, dto_elem in enumerate(dto):
+                dto_elem['predicts'][dto_index] = output_tensor[dto_index]
+        return dto

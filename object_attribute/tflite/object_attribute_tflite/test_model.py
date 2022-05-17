@@ -22,7 +22,8 @@ class TestUtils(unittest.TestCase):
                                                {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
             tflite_model = model.TfliteModel(model_dir_path)
             self.assertIsNotNone(tflite_model)
-            tflite_model.predict(input_tensor)
+            output = tflite_model.predict(input_tensor)
+            self.assertIsNotNone(output)
 
     def test__load_model_with_option(self):
         input_tensor = np.zeros((8, 640, 1280, 3), dtype=np.uint8)
