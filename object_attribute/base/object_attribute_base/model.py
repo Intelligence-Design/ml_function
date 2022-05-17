@@ -53,7 +53,7 @@ class BaseModel(metaclass=ABCMeta):
         __meta_dict: meta info for model
     """
 
-    DTO = [
+    EXAMPLE_DTO = [
         {'feature':
             {
                 'array': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
@@ -71,6 +71,10 @@ class BaseModel(metaclass=ABCMeta):
                 'array': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3, ]]),
                 'type': 'classification',
                 'classes': ['male', 'female', 'unknown']
+            }},
+        {'invoke_seconds':
+            {
+                'array': np.array([0.11, 0.12])
             }}
     ]
 
