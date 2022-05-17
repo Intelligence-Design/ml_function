@@ -9,12 +9,22 @@ def load_requires_from_file(fname):
     return [pkg.strip() for pkg in open(fname, 'r')]
 
 
+def load_links_from_file(filepath):
+    res = []
+    with open(filepath) as fp:
+        for pkg_name in fp.readlines():
+            if "git+ssh" in pkg_name:
+                res.append(pkg_name[pkg_name.find("git+ssh"):].strip())
+    return res
+
+
 if __name__ == '__main__':
     setuptools.setup(
         name="object-attribute-base",
         version="0.0.1",
         url="https://github.com/Intelligence-Design/ml_function/object_attribute/base",
         install_requires=load_requires_from_file('requirements.txt'),
+        dependency_links=load_links_from_file('requirements.txt'),
         author="id",
         author_email="",
         description="ml_function/object_attribute/base",

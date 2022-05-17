@@ -20,15 +20,15 @@ def load_links_from_file(filepath):
 
 if __name__ == '__main__':
     setuptools.setup(
-        name="ml-function-utils",
+        name="object-attribute-tflite",
         version="0.0.1",
-        url="https://github.com/Intelligence-Design/ml_function/ml_function_utils",
+        url="https://github.com/Intelligence-Design/ml_function/object_attribute/tflite",
         install_requires=load_requires_from_file('requirements.txt'),
         dependency_links=load_links_from_file('requirements.txt'),
         author="id",
         author_email="",
-        description="ml_function/ml_function_utils",
-        long_description="ml_function/ml_function_utils",
+        description="ml_function/object_attribute/tflite",
+        long_description="ml_function/object_attribute/tflite",
         long_description_content_type="text/markdown",
         packages=setuptools.find_packages(),
         classifiers=[
