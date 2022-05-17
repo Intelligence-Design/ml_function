@@ -45,6 +45,28 @@ class BaseModel(metaclass=ABCMeta):
         self._load_model(model_dir_path, options)
 
     @abstractmethod
+    def _load_model(cls, model_dir_path: str, options: Dict):
+        """Load model
+
+        Args:
+            model_dir_path: Load model directory path
+            options　: Load model options
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _preprocess(self, input_tensor: np.ndarray) -> np.ndarray:
+        """Predict
+
+        Args:
+            input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
+
+        Returns:
+            (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
     def predict(self, input_tensor: np.ndarray) -> List[Dict]:
         """Predict
 
@@ -63,16 +85,6 @@ class BaseModel(metaclass=ABCMeta):
     @meta_dict.setter
     def meta_dict(self, meta_dict):
         self.__meta_dict = meta_dict
-
-    @abstractmethod
-    def _load_model(cls, model_dir_path: str, options: Dict):
-        """Load model
-
-        Args:
-            model_dir_path: Load model directory path
-            options　: Load model options
-        """
-        raise NotImplementedError()
 
     @classmethod
     def calculate_euclidean_distance(cls, query_feature_array: np.ndarray, dst_feature_array: np.ndarray) -> np.ndarray:
