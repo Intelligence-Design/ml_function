@@ -69,7 +69,8 @@ class TfliteModel(BaseModel):
         self.interpreter = tflite.Interpreter(model_path=model_file_path, num_threads=num_thread)
         self.interpreter.allocate_tensors()
 
-    def _preprocess(self, input_tensor: np.ndarray) -> np.ndarray:
+    @classmethod
+    def _preprocess(cls, input_tensor: np.ndarray) -> np.ndarray:
         pass
 
     def predict(self, input_tensor: np.ndarray) -> List[Dict]:

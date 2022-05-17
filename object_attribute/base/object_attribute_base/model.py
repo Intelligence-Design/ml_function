@@ -89,8 +89,9 @@ class BaseModel(metaclass=ABCMeta):
         """
         raise NotImplementedError()
 
+    @classmethod
     @abstractmethod
-    def _preprocess(self, input_tensor: np.ndarray) -> np.ndarray:
+    def _preprocess(cls, input_tensor: np.ndarray) -> np.ndarray:
         """Predict
 
         Args:
