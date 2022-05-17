@@ -45,7 +45,7 @@ class BaseModel(metaclass=ABCMeta):
         self._load_model(model_dir_path, options)
 
     @abstractmethod
-    def _load_model(cls, model_dir_path: str, options: Dict):
+    def _load_model(self, model_dir_path: str, options: Dict):
         """Load model
 
         Args:
