@@ -11,6 +11,41 @@ class BaseModel(metaclass=ABCMeta):
 
     Args:
         model_dir_path: Load model directory path
+                        $ tree model_dir_path/
+                            model_dir_path/
+                            ├── *.{model:trt, tflite, ...}
+                            └── model.json
+                        $ cat model_dir_path/model.json
+                            {
+                              "model": [
+                                {
+                                  "key": "feature",
+                                  "type": "metric",
+                                  "metric": "cosine",
+                                  "dims": 128
+                                },
+                                {
+                                  "key": "gender",
+                                  "type": "classification",
+                                  "classes": [
+                                    "male",
+                                    "female",
+                                    "unknown"
+                                  ]
+                                },
+                                {
+                                  "key": "age",
+                                  "type": "classification",
+                                  "classes": [
+                                    "0_19",
+                                    "20_70",
+                                    "71_100",
+                                    "unknown"
+                                  ]
+                                }
+                              ],
+                              "train_repository": "https://github.com/Intelligence-Design/id-object-attribute",
+                              "commit_id": "203175f185730fe8c06e740039c56aa53f5cb5b1"
         options　: Load model options
 
     Attributes:
