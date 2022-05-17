@@ -13,5 +13,9 @@ DOCKER_BUILDKIT=1 docker build --secret id=ssh,src=${HOME}/.ssh/id_rsa -t object
 # Docker container run
 
 ```
-docker run --name object_attribute_tflite_container --rm -i -t object_attribute_tflite
+docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+           -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+           -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} \
+            --name object_attribute_tflite_container \
+            --rm -i -t object_attribute_tflite
 ```
