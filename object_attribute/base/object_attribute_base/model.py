@@ -96,7 +96,7 @@ class BaseModel(metaclass=ABCMeta):
 
         Args:
             input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
-
+            resize_input_shape : Resize size (Height, Width)
         Returns:
             (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
         Raises:
