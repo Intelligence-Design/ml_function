@@ -1,9 +1,8 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict
 import numpy as np
 import glob
 import os
 import multiprocessing
-import time
 import copy
 
 try:
