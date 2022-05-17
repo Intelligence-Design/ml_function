@@ -74,7 +74,7 @@ class BaseModel(metaclass=ABCMeta):
     ]
 
     def __init__(self, model_dir_path: str = None, options: Dict = None):
-        meta_json_path = glob.glob(os.path.join(model_dir_path, '**/meta.json'), recursive=True)[0]
+        meta_json_path = glob.glob(os.path.join(model_dir_path, '**/model.json'), recursive=True)[0]
         with open(meta_json_path, 'r') as f:
             self.meta_dict(json.load(f))
         self._load_model(model_dir_path, options)
