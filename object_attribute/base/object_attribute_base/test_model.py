@@ -17,6 +17,12 @@ class TestUtils(unittest.TestCase):
         distances = model.BaseModel.calculate_euclidean_distance(query_feature_array, dst_feature_array)
         self.assertGreater(distances[0], distances[1])
 
+    def test__preprocess(self):
+        input_tensor = np.zeros((8, 640, 1024, 3), dtype=np.uint8)
+        resize_input_shape = (128, 128)
+        output_tensor = model.BaseModel.preprocess(input_tensor, resize_input_shape)
+        self.assertTrue((output_tensor.shape == np.zeros(
+            (input_tensor.shape[0], *resize_input_shape, input_tensor.shape[3])).shape))
 
 if __name__ == "__main__":
     unittest.main()

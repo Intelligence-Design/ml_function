@@ -4,6 +4,7 @@ import numpy as np
 import glob
 import os
 import json
+from PIL import Image
 
 
 class BaseModel(metaclass=ABCMeta):
@@ -90,7 +91,6 @@ class BaseModel(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @classmethod
-    @abstractmethod
     def preprocess(cls, input_tensor: np.ndarray, resize_input_shape: Tuple[int, int]) -> np.ndarray:
         """Predict
 
@@ -100,9 +100,27 @@ class BaseModel(metaclass=ABCMeta):
         Returns:
             (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
         Raises:
-            ValueError: If dimension mismatch.
+            ValueError: If dimension mismatch or dtype mismatch
         """
-        raise NotImplementedError()
+
+        if len(input_tensor.shape) != 4:
+            raise ValueError('dimension mismatch')
+        if not np.issubdtype(input_tensor.dtype, np.uint8):
+            raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {input_tensor.dtype}')
+
+        output_tensor = np.zeros((input_tensor.shape[0], *resize_input_shape, input_tensor.shape[3]),
+                                 dtype=input_tensor.dtype)
+        for index, image in enumerate(input_tensor):
+            pil_image = Image.fromarray(image)
+            x_ratio, y_ratio = resize_input_shape[1] / pil_image.width, resize_input_shape[0] / pil_image.height
+            if x_ratio < y_ratio:
+                resize_size = (resize_input_shape[1], round(pil_image.height * x_ratio))
+            else:
+                resize_size = (round(pil_image.width * y_ratio), resize_input_shape[0])
+            resize_pil_image = pil_image.resize(resize_size)
+            output_image = np.array(resize_pil_image)
+            output_tensor[index, :output_image.shape[0], :output_image.shape[1], :] = output_image
+        return output_tensor
 
     @abstractmethod
     def predict(self, input_tensor: np.ndarray) -> List[Dict]:

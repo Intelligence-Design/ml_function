@@ -1,8 +1,9 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import numpy as np
 import glob
 import os
 import multiprocessing
+from PIL import Image
 
 try:
     import tflite_runtime.interpreter as tflite
@@ -69,9 +70,10 @@ class TfliteModel(BaseModel):
         self.interpreter = tflite.Interpreter(model_path=model_file_path, num_threads=num_thread)
         self.interpreter.allocate_tensors()
 
-    @classmethod
-    def _preprocess(cls, input_tensor: np.ndarray) -> np.ndarray:
-        pass
-
     def predict(self, input_tensor: np.ndarray) -> List[Dict]:
-        pass
+        if len(input_tensor.shape) != 4:
+            raise ValueError('dimension mismatch')
+        if not np.issubdtype(input_tensor.dtype, np.uint8):
+            raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {input_tensor.dtype}')
+
+        resize_input_tensor = self._
