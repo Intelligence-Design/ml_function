@@ -54,24 +54,28 @@ class BaseModel(metaclass=ABCMeta):
     """
 
     EXAMPLE_DTO = [
-        {'feature':
-            {
-                'array': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
-                'type': 'metric',
-                'metric': 'cosine'
+        {
+         'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
+         'key': 'feature',
+         'type': 'metric',
+         'extra': {
+             'metric': 'cosine',
+             'dims': 128
+         }},
+        {
+            'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
+            'key': 'gender',
+            'type': 'classification',
+            'extra': {
+                'labels': ['male', 'female', 'unknown']
             }},
-        {'gender':
-            {
-                'array': np.array([[0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4]]),
-                'type': 'classification',
-                'classes': ['0_19', '20_70', '71_100', 'unknown']
+        {
+            'predicts': np.array([[0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4]]),
+            'key': 'age',
+            'type': 'classification',
+            'extra': {
+                'labels': ['0_19', '20_70', '71_100', 'unknown']
             }},
-        {'age':
-            {
-                'array': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3, ]]),
-                'type': 'classification',
-                'classes': ['male', 'female', 'unknown']
-            }}
     ]
 
     def __init__(self, model_dir_path: str = None, options: Dict = None):
