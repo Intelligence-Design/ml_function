@@ -91,7 +91,7 @@ class BaseModel(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def _preprocess(cls, input_tensor: np.ndarray, resize_input_shape: Tuple[int, int]) -> np.ndarray:
+    def preprocess(cls, input_tensor: np.ndarray, resize_input_shape: Tuple[int, int]) -> np.ndarray:
         """Predict
 
         Args:
@@ -99,6 +99,8 @@ class BaseModel(metaclass=ABCMeta):
 
         Returns:
             (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
+        Raises:
+            ValueError: If dimension mismatch.
         """
         raise NotImplementedError()
 
