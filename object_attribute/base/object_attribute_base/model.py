@@ -6,7 +6,7 @@ import os
 import json
 
 
-class Base(metaclass=ABCMeta):
+class BaseModel(metaclass=ABCMeta):
     """Base class for object_attribute.
 
     Args:
