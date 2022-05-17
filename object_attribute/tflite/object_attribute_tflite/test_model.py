@@ -16,18 +16,22 @@ class TestUtils(unittest.TestCase):
         self.temp_dir.cleanup()
 
     def test__load_model(self):
+        input_tensor = np.zeros((8, 640, 1280, 3), dtype=np.uint8)
         for model_name in DEFAULT_MODEL_DIR_PATH_DICT.keys():
             model_dir_path = utils.s3_cp_unzip(DEFAULT_MODEL_DIR_PATH_DICT[model_name]['S3Path'], self.temp_dir.name,
                                                {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
             tflite_model = model.TfliteModel(model_dir_path)
             self.assertIsNotNone(tflite_model)
+            tflite_model.predict(input_tensor)
 
     def test__load_model_with_option(self):
+        input_tensor = np.zeros((8, 640, 1280, 3), dtype=np.uint8)
         for model_name in DEFAULT_MODEL_DIR_PATH_DICT.keys():
             model_dir_path = utils.s3_cp_unzip(DEFAULT_MODEL_DIR_PATH_DICT[model_name]['S3Path'], self.temp_dir.name,
                                                {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
             tflite_model = model.TfliteModel(model_dir_path, options={'num_threads': 1})
             self.assertIsNotNone(tflite_model)
+            tflite_model.predict(input_tensor)
 
 
 if __name__ == "__main__":

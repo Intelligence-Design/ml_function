@@ -3,7 +3,8 @@ import numpy as np
 import glob
 import os
 import multiprocessing
-from PIL import Image
+import time
+import copy
 
 try:
     import tflite_runtime.interpreter as tflite
@@ -51,6 +52,12 @@ class TfliteModel(BaseModel):
                                   ]
                                 }
                               ],
+                              "input_size": [
+                                1,
+                                128,
+                                128,
+                                3
+                              ],
                               "train_repository": "https://github.com/Intelligence-Design/id-object-attribute",
                               "commit_id": "203175f185730fe8c06e740039c56aa53f5cb5b1"
         options　: Load model options
@@ -76,4 +83,35 @@ class TfliteModel(BaseModel):
         if not np.issubdtype(input_tensor.dtype, np.uint8):
             raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {input_tensor.dtype}')
 
-        resize_input_tensor = self._
+        model_input_shape = self.interpreter.get_input_details()[0]['shape']
+        resize_input_tensor = self.preprocess(input_tensor, (model_input_shape[1], model_input_shape[2]))
+        output_tensor_list = []
+        for resize_input_image in resize_input_tensor:
+            self.__set_input_tensor(resize_input_image)
+            self.interpreter.invoke()
+            output_tensor = self.__get_output_tensor()
+            output_tensor_list.append(output_tensor)
+        result_dto = self.__output_tensor_list2dto(output_tensor_list)
+
+    def __set_input_tensor(self, image: np.ndarray):
+        input_tensor = self.interpreter.tensor(self.interpreter.get_input_details()[0]['index'])()
+        input_tensor.fill(0)
+        input_image = image.astype(self.interpreter.get_input_details()[0]['dtype'])
+        input_tensor[0, :input_image.shape[0], :input_image.shape[1], :input_image.shape[2]] = input_image
+
+    def __get_output_tensor(self) -> List[np.ndarray]:
+        output_details = self.interpreter.get_output_details()
+        output_tensor = []
+        for index in range(len(output_details)):
+            output = self.interpreter.get_tensor(output_details[index]['index'])
+            scale, zero_point = output_details[index]['quantization']
+            output = scale * (output - zero_point)
+            output_tensor.append(output)
+        return output_tensor
+
+    def __output_tensor_list2dto(self, output_tensor_list: List[List[np.ndarray]]) -> List[Dict]:
+        example_dto = copy.deepcopy(self.EXAMPLE_DTO)
+        for output_tensor in output_tensor_list:
+            print()
+
+

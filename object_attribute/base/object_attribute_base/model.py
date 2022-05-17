@@ -55,13 +55,13 @@ class BaseModel(metaclass=ABCMeta):
 
     EXAMPLE_DTO = [
         {
-         'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
-         'key': 'feature',
-         'type': 'metric',
-         'extra': {
-             'metric': 'cosine',
-             'dims': 128
-         }},
+            'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
+            'key': 'feature',
+            'type': 'metric',
+            'extra': {
+                'metric': 'cosine',
+                'dims': 128
+            }},
         {
             'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
             'key': 'gender',
