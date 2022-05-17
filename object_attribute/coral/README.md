@@ -17,5 +17,5 @@ docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
            -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
            -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} \
             --name object_attribute_coral_container \
-            --rm -i -t object_attribute_coral
+            --rm -i -t  --privileged -v /dev/bus/usb:/dev/bus/usb object_attribute_coral
 ```

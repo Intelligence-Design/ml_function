@@ -1,4 +1,8 @@
 FROM python:3.8.13-bullseye as builder
+
+ENV TZ Asia/Tokyo
+ENV DEBIAN_FRONTEND=noninteractive
+
 WORKDIR /opt/build
 COPY ./ /opt/build/
 RUN --mount=type=secret,id=ssh,dst=/root/.ssh/id_rsa \
