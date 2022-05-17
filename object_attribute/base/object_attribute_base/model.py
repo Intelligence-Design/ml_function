@@ -76,7 +76,7 @@ class BaseModel(metaclass=ABCMeta):
     def __init__(self, model_dir_path: str = None, options: Dict = None):
         meta_json_path = glob.glob(os.path.join(model_dir_path, '**/model.json'), recursive=True)[0]
         with open(meta_json_path, 'r') as f:
-            self.meta_dict(json.load(f))
+            self.__meta_dict = json.load(f)
         self._load_model(model_dir_path, options)
 
     @abstractmethod
@@ -116,10 +116,6 @@ class BaseModel(metaclass=ABCMeta):
     @property
     def meta_dict(self):
         return self.__meta_dict
-
-    @meta_dict.setter
-    def meta_dict(self, meta_dict):
-        self.__meta_dict = meta_dict
 
     @classmethod
     def calculate_euclidean_distance(cls, query_feature_array: np.ndarray, dst_feature_array: np.ndarray) -> np.ndarray:
