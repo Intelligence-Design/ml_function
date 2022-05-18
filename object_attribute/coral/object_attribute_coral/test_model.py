@@ -15,7 +15,7 @@ class TestUtils(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def test__load_model(self):
+    def test_model(self):
         input_tensor = np.zeros((8, 640, 1280, 3), dtype=np.uint8)
         for model_name in DEFAULT_MODEL_DIR_PATH_DICT.keys():
             model_dir_path = utils.s3_cp_unzip(DEFAULT_MODEL_DIR_PATH_DICT[model_name]['S3Path'], self.temp_dir.name,
@@ -25,7 +25,7 @@ class TestUtils(unittest.TestCase):
             output = tflite_model.predict(input_tensor)
             self.assertIsNotNone(output)
 
-    def test__load_model_with_option(self):
+    def test_model_with_option(self):
         input_tensor = np.zeros((8, 640, 1280, 3), dtype=np.uint8)
         for model_name in DEFAULT_MODEL_DIR_PATH_DICT.keys():
             model_dir_path = utils.s3_cp_unzip(DEFAULT_MODEL_DIR_PATH_DICT[model_name]['S3Path'], self.temp_dir.name,
