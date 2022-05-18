@@ -32,7 +32,8 @@ class TestUtils(unittest.TestCase):
                                                {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
             tflite_model = model.TfliteModel(model_dir_path, options={'num_threads': 1})
             self.assertIsNotNone(tflite_model)
-            tflite_model.predict(input_tensor)
+            output = tflite_model.predict(input_tensor)
+            self.assertIsNotNone(output)
 
 
 if __name__ == "__main__":
