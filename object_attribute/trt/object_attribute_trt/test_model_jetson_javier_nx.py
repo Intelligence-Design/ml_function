@@ -2,7 +2,7 @@ from . import DEFAULT_MODEL_DIR_PATH_DICT
 from .test_model import TestUtils
 import unittest
 
-class Gtx1080TestUtils(TestUtils):
+class JetsonXavierNXTestUtils(TestUtils):
     def test_model(self):
         for key in DEFAULT_MODEL_DIR_PATH_DICT.keys():
             model_name = 'jetson_javier_nx'
