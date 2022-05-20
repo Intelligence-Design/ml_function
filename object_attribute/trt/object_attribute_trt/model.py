@@ -177,7 +177,10 @@ class TrtModel(BaseModel):
             batch = resize_input_tensor[index:index + model_input_shape[0], :, :, :]
             batch_pad = np.zeros(model_input_shape, model_input_dtype)
             batch_pad[:batch.shape[0], :, :, :] = batch.astype(model_input_dtype)
+            import time
+            start = time.time()
             output_tensor = self.__predict(batch_pad)
+            print(f'{time.time()-start}[fps]')
             for tensor_index, output_tensor_elem in enumerate(output_tensor):
                 output_tensor_list[tensor_index][index:index+batch.shape[0]] = output_tensor_elem[:batch.shape[0]]
         dto = self.__output_tensor_list2dto(output_tensor_list)
