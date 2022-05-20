@@ -20,10 +20,9 @@ class TestUtils(unittest.TestCase):
         model_dir_path = utils.s3_cp_unzip(DEFAULT_MODEL_DIR_PATH_DICT[model_name]['S3Path'], self.temp_dir.name,
                                            {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
         trt_model = model.TrtModel(model_dir_path)
-        for _ in range(10):
-            self.assertIsNotNone(trt_model)
-            output = trt_model.predict(input_tensor)
-            self.assertIsNotNone(output)
+        self.assertIsNotNone(trt_model)
+        output = trt_model.predict(input_tensor)
+        self.assertIsNotNone(output)
 
 if __name__ == "__main__":
     unittest.main()

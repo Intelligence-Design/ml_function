@@ -9,6 +9,6 @@ DEFAULT_MODEL_DIR_PATH_DICT = {
     },
     'person_g4dn_xlarge_Deep_Learning_Base_AMI_Ubuntu_18_04_Version_44_0': {
         'S3Path': 's3://id-ai-function/v2/object_attribute/trt/v_0_0_1_object_attribute_trt_person_person_g4dn_xlarge_Deep_Learning_Base_AMI_Ubuntu_18_04_Version_44_0.zip',
-        'VersionId': 'P.zp34.ZubLoLMHFNQPN9gVYP_R6KvOR'
+        'VersionId': 'YAeekAL8qakk3p66LJbVLQzJhXivyAUM'
     },
 }
