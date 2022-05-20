@@ -10,7 +10,14 @@ pip install git+ssh://git@github.com/Intelligence-Design/ml_function.git@feature
 sudo DOCKER_BUILDKIT=1 docker build --secret id=ssh,src=${HOME}/.ssh/id_rsa -f jetson_xavier_nx_jp461.Dockerfile -t object_attribute_trt .
 ```
 
-# Docker container run
+## For g4dn_xlarge_Deep_Learning_Base AMI (Ubuntu 18.04)_Version.44.0
+```
+sudo DOCKER_BUILDKIT=1 docker build --secret id=ssh,src=${HOME}/.ssh/id_rsa -f g4dn_xlarge_Deep_Learning_Base_AMI_(Ubuntu_18_04)_Version_44_0.Dockerfile -t object_attribute_trt .
+```
+
+
+# Docker run
+##For jetson_xavier_nx_jp461 Docker container run
 
 ```
 sudo docker run --runtime nvidia \
