@@ -18,4 +18,5 @@ docker run -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
            -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} \
             --name object_attribute_tflite_container \
             --rm -i -t object_attribute_tflite
+python3 -m object_attribute_tflite.test_model
 ```
