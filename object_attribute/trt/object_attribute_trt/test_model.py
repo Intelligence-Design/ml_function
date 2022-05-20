@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import numpy as np
+import time
 
 from ml_function_utils import utils
 
@@ -23,6 +24,11 @@ class TestUtils(unittest.TestCase):
         self.assertIsNotNone(trt_model)
         output = trt_model.predict(input_tensor)
         self.assertIsNotNone(output)
+        for _ in range(10):
+            start_time = time.time()
+            output = trt_model.predict(input_tensor)
+            ent_time = time.time()
+            print(f'{ent_time-start_time}[sec]')
 
 if __name__ == "__main__":
     unittest.main()
