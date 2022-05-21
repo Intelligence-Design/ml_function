@@ -16,7 +16,7 @@ class TestUtils(unittest.TestCase):
         self.temp_dir.cleanup()
 
     def _test_model(self, model_name):
-        input_tensor = np.zeros((40, 640, 1280, 3), dtype=np.uint8)
+        input_tensor = np.random.randint(0, 255, (24, 720, 1280, 3), dtype=np.uint8)
         model_dir_path = utils.s3_cp_unzip(DEFAULT_MODEL_DIR_PATH_DICT[model_name]['S3Path'], self.temp_dir.name,
                                            {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
         trt_model = model.TrtModel(model_dir_path)
