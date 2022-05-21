@@ -35,7 +35,7 @@ class TfliteModel(BaseModel):
         self.interpreter = tflite.Interpreter(model_path=model_file_path, num_threads=num_thread)
         self.interpreter.allocate_tensors()
 
-    def predict(self, input_tensor: np.ndarray) -> List[Dict]:
+    def _predict(self, input_tensor: np.ndarray) -> List[Dict]:
         if len(input_tensor.shape) != 4:
             raise ValueError('dimension mismatch')
         if not np.issubdtype(input_tensor.dtype, np.uint8):
