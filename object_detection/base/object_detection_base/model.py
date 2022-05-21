@@ -330,9 +330,9 @@ class BaseModel(metaclass=ABCMeta):
                 sort_index = np.delete(sort_index, del_index)
                 i -= 1
 
-            mask_bboxes = mask_bboxes[sort_index]
-            mask_scores = mask_scores[sort_index]
-            mask_classes = mask_classes[sort_index]
+            mask_bboxes = mask_bboxes[sort_index][::-1]
+            mask_scores = mask_scores[sort_index][::-1]
+            mask_classes = mask_classes[sort_index][::-1]
 
             filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
             filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
