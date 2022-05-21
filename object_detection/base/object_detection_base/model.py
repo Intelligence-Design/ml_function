@@ -149,7 +149,7 @@ class BaseModel(metaclass=ABCMeta):
             model_dir_path: Load model directory path
             options　: Load model options
         Returns:
-            (numpy.ndarray) : A model input shape-(Batch, Height, Width, Channel) array
+            (tuple) : A model input shape-(Batch, Height, Width, Channel) array
         """
         raise NotImplementedError()
 

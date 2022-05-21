@@ -112,7 +112,7 @@ class BaseModel(metaclass=ABCMeta):
         meta_json_path = glob.glob(os.path.join(model_dir_path, '**/model.json'), recursive=True)[0]
         with open(meta_json_path, 'r') as f:
             self.__meta_dict = json.load(f)
-        self._load_model(model_dir_path, options)
+        self.model_input_shape = self._load_model(model_dir_path, options)
 
     @abstractmethod
     def _load_model(self, model_dir_path: str, options: Dict):
@@ -121,6 +121,8 @@ class BaseModel(metaclass=ABCMeta):
         Args:
             model_dir_path: Load model directory path
             options　: Load model options
+        Returns:
+            (tuple) : A model input shape-(Batch, Height, Width, Channel) array
         """
         raise NotImplementedError()
 
@@ -156,12 +158,24 @@ class BaseModel(metaclass=ABCMeta):
             output_tensor[index, :output_image.shape[0], :output_image.shape[1], :] = output_image
         return output_tensor
 
-    @abstractmethod
-    def predict(self, input_tensor: np.ndarray) -> List[Dict]:
+    def predict(self, input_tensor: np.ndarray):
         """Predict
 
         Args:
             input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
+
+        Returns:
+            (list): ex. Base.DTO
+        """
+        resize_input_tensor = self.preprocess(input_tensor, (self.model_input_shape[1], self.model_input_shape[2]))
+        return self._predict(resize_input_tensor)
+
+    @abstractmethod
+    def _predict(self, resize_input_tensor: np.ndarray) -> List[Dict]:
+        """Predict
+
+        Args:
+            resize_input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
 
         Returns:
             (list): ex. Base.DTO

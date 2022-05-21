@@ -66,20 +66,20 @@ class TrtModel(BaseModel):
         assert len(self.outputs) > 0
         assert len(self.allocations) > 0
 
-    def predict(self, input_tensor: np.ndarray) -> List[Dict]:
-        if len(input_tensor.shape) != 4:
-            raise ValueError('dimension mismatch')
-        if not np.issubdtype(input_tensor.dtype, np.uint8):
-            raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {input_tensor.dtype}')
+        return self.inputs[0]['shape']
 
-        model_input_shape = self.inputs[0]['shape']
+    def _predict(self, resize_input_tensor: np.ndarray) -> List[Dict]:
+        if len(resize_input_tensor.shape) != 4:
+            raise ValueError('dimension mismatch')
+        if not np.issubdtype(resize_input_tensor.dtype, np.uint8):
+            raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {resize_input_tensor.dtype}')
+
         model_input_dtype = self.inputs[0]['dtype']
-        resize_input_tensor = self.preprocess(input_tensor, (model_input_shape[1], model_input_shape[2]))
         output_spec_list = self.__output_spec()
         output_tensor_list = [np.zeros((resize_input_tensor.shape[0], *output_spec[0][1:]), output_spec[1]) for output_spec in output_spec_list]
-        for index in range(0, input_tensor.shape[0], model_input_shape[0]):
-            batch = resize_input_tensor[index:index + model_input_shape[0], :, :, :]
-            batch_pad = np.zeros(model_input_shape, model_input_dtype)
+        for index in range(0, resize_input_tensor.shape[0], self.model_input_shape[0]):
+            batch = resize_input_tensor[index:index + self.model_input_shape[0], :, :, :]
+            batch_pad = np.zeros(self.model_input_shape, model_input_dtype)
             batch_pad[:batch.shape[0], :, :, :] = batch.astype(model_input_dtype)
             output_tensor = self.__predict(batch_pad)
             for tensor_index, output_tensor_elem in enumerate(output_tensor):
