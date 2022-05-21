@@ -22,7 +22,7 @@ class TestUtils(unittest.TestCase):
                                                {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
             tflite_model = model.TfliteModel(model_dir_path)
             self.assertIsNotNone(tflite_model)
-            output = tflite_model.predict(input_tensor, score_th=0.05, iou_th=0.5)
+            output = tflite_model.predict(input_tensor, score_th=0.05, iou_th=0.5, white_classes_filter=True)
             self.assertIsNotNone(output)
 
     def test_model_with_option(self):
@@ -32,7 +32,7 @@ class TestUtils(unittest.TestCase):
                                                {'VersionId': DEFAULT_MODEL_DIR_PATH_DICT[model_name]['VersionId']})
             tflite_model = model.TfliteModel(model_dir_path, options={'num_threads': 1})
             self.assertIsNotNone(tflite_model)
-            output = tflite_model.predict(input_tensor, score_th=0.01, iou_th=1.0)
+            output = tflite_model.predict(input_tensor, score_th=0.01, iou_th=1.0, white_classes_filter=True)
             self.assertIsNotNone(output)
 
 

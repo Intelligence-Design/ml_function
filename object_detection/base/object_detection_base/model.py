@@ -183,7 +183,8 @@ class BaseModel(metaclass=ABCMeta):
             output_tensor[index, :output_image.shape[0], :output_image.shape[1], :] = output_image
         return output_tensor
 
-    def predict(self, input_tensor: np.ndarray, score_th: float = 0.2, iou_th: float = 0.5, white_classes_filter: bool = True) -> List[Dict]:
+    def predict(self, input_tensor: np.ndarray, score_th: float = 0.2, iou_th: float = 0.5,
+                white_classes_filter: bool = True) -> List[Dict]:
         """Predict
 
         Args:
@@ -199,6 +200,8 @@ class BaseModel(metaclass=ABCMeta):
         dto = self.__filter_limit(dto)
         if score_th is not None:
             dto = self.__filter_by_score(dto, score_th)
+        if white_classes_filter:
+            dto = self.__filter_by_white_classes(dto)
         if iou_th is not None:
             dto = self.__nms(dto, iou_th)
         return dto
@@ -221,7 +224,7 @@ class BaseModel(metaclass=ABCMeta):
 
     @classmethod
     def __filter_limit(cls, dto):
-        boxes, scores, classes, box_nums = cls.__split_dto(dto)
+        boxes, scores, classes, box_nums, _ = cls.split_dto(dto)
         boxes = np.minimum(1, np.maximum(boxes, 0))
         dto = cls.__replace_dto(dto, boxes, scores, classes, box_nums)
         return dto
@@ -241,7 +244,7 @@ class BaseModel(metaclass=ABCMeta):
             filter_box_nums = len(mask_bboxes)
             return filter_bboxes, filter_scores, filter_classes, filter_box_nums
 
-        boxes, scores, classes, box_nums = cls.__split_dto(dto)
+        boxes, scores, classes, box_nums, _ = cls.split_dto(dto)
         filter_boxes_list, filter_scores_list, filter_classes_list, filter_box_nums_list = [], [], [], []
         for index in range(boxes.shape[0]):
             filter_boxes, filter_scores, filter_classes, filter_box_nums = __filter(boxes[index], scores[index],
@@ -254,6 +257,37 @@ class BaseModel(metaclass=ABCMeta):
 
         dto = cls.__replace_dto(dto, np.asarray(filter_boxes_list), np.asarray(filter_scores_list),
                                 np.asarray(filter_classes_list), np.asarray(filter_box_nums_list))
+        return dto
+
+    def __filter_by_white_classes(self, dto):
+        def __filter(bboxes, scores, classes, box_nums, white_classes_indexes):
+            filter_bboxes = np.zeros(bboxes.shape, bboxes.dtype)
+            filter_scores = np.zeros(scores.shape, scores.dtype)
+            filter_classes = np.zeros(classes.shape, classes.dtype)
+            mask = np.zeros(classes.shape, np.bool)
+            for white_classes_index in white_classes_indexes:
+                mask = mask | (classes.astype(np.int) == white_classes_index)
+            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask], scores[:int(box_nums)][mask], \
+                                                     classes[:int(box_nums)][mask]
+            filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
+            filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
+            filter_classes[:mask_classes.shape[0]] = mask_classes.astype(filter_classes.dtype)
+            filter_box_nums = len(mask_bboxes)
+            return filter_bboxes, filter_scores, filter_classes, filter_box_nums
+
+        boxes, scores, classes, box_nums, white_classes_indexes = self.split_dto(dto)
+        filter_boxes_list, filter_scores_list, filter_classes_list, filter_box_nums_list = [], [], [], []
+        for index in range(boxes.shape[0]):
+            filter_boxes, filter_scores, filter_classes, filter_box_nums = __filter(boxes[index], scores[index],
+                                                                                    classes[index], box_nums[index],
+                                                                                    white_classes_indexes)
+            filter_boxes_list.append(filter_boxes)
+            filter_scores_list.append(filter_scores)
+            filter_classes_list.append(filter_classes)
+            filter_box_nums_list.append(filter_box_nums)
+
+        dto = self.__replace_dto(dto, np.asarray(filter_boxes_list), np.asarray(filter_scores_list),
+                                 np.asarray(filter_classes_list), np.asarray(filter_box_nums_list))
         return dto
 
     @classmethod
@@ -300,12 +334,13 @@ class BaseModel(metaclass=ABCMeta):
             filter_box_nums = len(mask_bboxes)
             return filter_bboxes, filter_scores, filter_classes, filter_box_nums
 
-        boxes, scores, classes, box_nums = cls.__split_dto(dto)
+        boxes, scores, classes, box_nums, _ = cls.split_dto(dto)
 
         filter_boxes_list, filter_scores_list, filter_classes_list, filter_box_nums_list = [], [], [], []
         for index in range(boxes.shape[0]):
             filter_boxes, filter_scores, filter_classes, filter_box_nums = __filter(boxes[index], scores[index],
-                                                                                    classes[index], box_nums[index], iou_th)
+                                                                                    classes[index], box_nums[index],
+                                                                                    iou_th)
             filter_boxes_list.append(filter_boxes)
             filter_scores_list.append(filter_scores)
             filter_classes_list.append(filter_classes)
@@ -316,9 +351,9 @@ class BaseModel(metaclass=ABCMeta):
         return dto
 
     @classmethod
-    def __split_dto(cls, dto):
+    def split_dto(cls, dto):
         dto = copy.deepcopy(dto)
-        boxes, scores, classes, box_nums = None, None, None, None
+        boxes, scores, classes, box_nums, white_classes_indexes = None, None, None, None, None
         for dto_elem in dto:
             if dto_elem['type'] == 'box':
                 boxes = dto_elem['predicts']
@@ -326,9 +361,11 @@ class BaseModel(metaclass=ABCMeta):
                 scores = dto_elem['predicts']
             elif dto_elem['type'] == 'class':
                 classes = dto_elem['predicts']
+                white_classes_indexes = [dto_elem['extra']['classes'].index(whilte_class) for whilte_class in
+                                         dto_elem['extra']['white_classes']]
             elif dto_elem['type'] == 'box_num':
                 box_nums = dto_elem['predicts']
-        return boxes, scores, classes, box_nums
+        return boxes, scores, classes, box_nums, white_classes_indexes
 
     @classmethod
     def __replace_dto(cls, dto, boxes, scores, classes, box_nums):
