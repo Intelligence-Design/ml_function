@@ -18,65 +18,95 @@ class BaseModel(metaclass=ABCMeta):
                             └── model.json
                         $ cat model_dir_path/model.json
                             {
-                              "model": [
+                              "output_dto": [
                                 {
+                                  "predicts": [
+                                    [
+                                      0.1,
+                                      0.2,
+                                      0.3,
+                                      0.45678999,
+                                      0.9
+                                    ],
+                                    [
+                                      0.1,
+                                      0.2,
+                                      0.3,
+                                      0.45678999,
+                                      0.9
+                                    ]
+                                  ],
                                   "key": "feature",
                                   "type": "metric",
-                                  "metric": "cosine",
-                                  "dims": 128
+                                  "extra": {
+                                    "metric": "cosine",
+                                    "dims": 128
+                                  }
                                 },
                                 {
+                                  "predicts": [
+                                    [
+                                      0.1,
+                                      0.2,
+                                      0.3
+                                    ],
+                                    [
+                                      0.1,
+                                      0.2,
+                                      0.3
+                                    ]
+                                  ],
                                   "key": "gender",
                                   "type": "classification",
-                                  "classes": [
-                                    "male",
-                                    "female",
-                                    "unknown"
-                                  ]
+                                  "extra": {
+                                    "classes": [
+                                      "male",
+                                      "female",
+                                      "unknown"
+                                    ]
+                                  }
                                 },
                                 {
+                                  "predicts": [
+                                    [
+                                      0.1,
+                                      0.2,
+                                      0.3,
+                                      0.4
+                                    ],
+                                    [
+                                      0.1,
+                                      0.2,
+                                      0.3,
+                                      0.4
+                                    ]
+                                  ],
                                   "key": "age",
                                   "type": "classification",
-                                  "classes": [
-                                    "0_19",
-                                    "20_70",
-                                    "71_100",
-                                    "unknown"
-                                  ]
+                                  "extra": {
+                                    "classes": [
+                                      "0_19",
+                                      "20_70",
+                                      "71_100",
+                                      "unknown"
+                                    ]
+                                  }
                                 }
+                              ],
+                              "input_size": [
+                                1,
+                                128,
+                                128,
+                                3
                               ],
                               "train_repository": "https://github.com/Intelligence-Design/id-object-attribute",
                               "commit_id": "203175f185730fe8c06e740039c56aa53f5cb5b1"
+                            }
         options　: Load model options
 
     Attributes:
         __meta_dict: meta info for model
     """
-
-    EXAMPLE_DTO = [
-        {
-            'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
-            'key': 'feature',
-            'type': 'metric',
-            'extra': {
-                'metric': 'cosine',
-                'dims': 128
-            }},
-        {
-            'predicts': np.array([[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]]),
-            'key': 'gender',
-            'type': 'classification',
-            'extra': {
-                'labels': ['male', 'female', 'unknown']
-            }},
-        {
-            'predicts': np.array([[0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4]]),
-            'key': 'age',
-            'type': 'classification',
-            'extra': {
-                'labels': ['0_19', '20_70', '71_100', 'unknown']
-            }},
-    ]
 
     def __init__(self, model_dir_path: str = None, options: Dict = None):
         meta_json_path = glob.glob(os.path.join(model_dir_path, '**/model.json'), recursive=True)[0]
