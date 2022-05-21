@@ -232,12 +232,14 @@ class BaseModel(metaclass=ABCMeta):
     @classmethod
     def __filter_by_score(cls, dto, score_th=0.2):
         def __filter(bboxes, scores, classes, box_nums, score_th=0.2):
+            if int(box_nums) == 0:
+                return bboxes, scores, classes, box_nums
             filter_bboxes = np.zeros(bboxes.shape, bboxes.dtype)
             filter_scores = np.zeros(scores.shape, scores.dtype)
             filter_classes = np.zeros(classes.shape, classes.dtype)
             mask = scores > score_th
-            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask], scores[:int(box_nums)][mask], \
-                                                     classes[:int(box_nums)][mask]
+            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask[:int(box_nums)]], scores[:int(box_nums)][mask[:int(box_nums)]], \
+                                                     classes[:int(box_nums)][mask[:int(box_nums)]]
             filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
             filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
             filter_classes[:mask_classes.shape[0]] = mask_classes.astype(filter_classes.dtype)
@@ -261,14 +263,16 @@ class BaseModel(metaclass=ABCMeta):
 
     def __filter_by_white_classes(self, dto):
         def __filter(bboxes, scores, classes, box_nums, white_classes_indexes):
+            if int(box_nums) == 0:
+                return bboxes, scores, classes, box_nums
             filter_bboxes = np.zeros(bboxes.shape, bboxes.dtype)
             filter_scores = np.zeros(scores.shape, scores.dtype)
             filter_classes = np.zeros(classes.shape, classes.dtype)
             mask = np.zeros(classes.shape, np.bool)
             for white_classes_index in white_classes_indexes:
                 mask = mask | (classes.astype(np.int) == white_classes_index)
-            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask], scores[:int(box_nums)][mask], \
-                                                     classes[:int(box_nums)][mask]
+            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][[mask[:int(box_nums)]]], scores[:int(box_nums)][[mask[:int(box_nums)]]], \
+                                                     classes[:int(box_nums)][[mask[:int(box_nums)]]]
             filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
             filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
             filter_classes[:mask_classes.shape[0]] = mask_classes.astype(filter_classes.dtype)
@@ -305,6 +309,8 @@ class BaseModel(metaclass=ABCMeta):
                 iou_np = intersect / (a_area + b_area - intersect)
                 return iou_np
 
+            if int(box_nums) == 0:
+                return bboxes, scores, classes, box_nums
             filter_bboxes = np.zeros(bboxes.shape, bboxes.dtype)
             filter_scores = np.zeros(scores.shape, scores.dtype)
             filter_classes = np.zeros(classes.shape, classes.dtype)

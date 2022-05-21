@@ -88,7 +88,7 @@ class TrtModel(BaseModel):
         dto = self.__output_tensor_list2dto(output_tensor_list)
         return dto
 
-    def _predict(self, input_tensor: np.ndarray):
+    def __predict(self, input_tensor: np.ndarray):
         # Prepare the output data
         outputs = []
         for shape, dtype in self.__output_spec():
