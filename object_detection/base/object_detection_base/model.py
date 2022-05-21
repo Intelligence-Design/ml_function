@@ -53,11 +53,12 @@ class BaseModel(metaclass=ABCMeta):
                               "key": "detection",
                               "type": "box",
                               "extra": {
-                                "details":[
-                                "y1_ratio",
-                                "x1_ratio",
-                                "y2_ratio",
-                                "x2_ratio",
+                                "details": [
+                                  "y1_ratio",
+                                  "x1_ratio",
+                                  "y2_ratio",
+                                  "x2_ratio"
+                                ]
                               }
                             },
                             {
