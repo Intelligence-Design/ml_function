@@ -34,15 +34,13 @@ class TfliteModel(BaseModel):
         model_file_path = glob.glob(os.path.join(model_dir_path, '**/*.tflite'), recursive=True)[0]
         self.interpreter = tflite.Interpreter(model_path=model_file_path, num_threads=num_thread)
         self.interpreter.allocate_tensors()
+        return self.interpreter.get_input_details()[0]['shape']
 
-    def _predict(self, input_tensor: np.ndarray) -> List[Dict]:
-        if len(input_tensor.shape) != 4:
+    def _predict(self, resize_input_tensor: np.ndarray) -> List[Dict]:
+        if len(resize_input_tensor.shape) != 4:
             raise ValueError('dimension mismatch')
-        if not np.issubdtype(input_tensor.dtype, np.uint8):
-            raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {input_tensor.dtype}')
-
-        model_input_shape = self.interpreter.get_input_details()[0]['shape']
-        resize_input_tensor = self.preprocess(input_tensor, (model_input_shape[1], model_input_shape[2]))
+        if not np.issubdtype(resize_input_tensor.dtype, np.uint8):
+            raise ValueError(f'dtype mismatch expected: {np.uint8}, actual: {resize_input_tensor.dtype}')
 
         output_tensor_list = []
         for resize_input_image in resize_input_tensor:

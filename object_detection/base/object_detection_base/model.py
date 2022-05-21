@@ -139,20 +139,22 @@ class BaseModel(metaclass=ABCMeta):
         meta_json_path = glob.glob(os.path.join(model_dir_path, '**/model.json'), recursive=True)[0]
         with open(meta_json_path, 'r') as f:
             self.__meta_dict = json.load(f)
-        self._load_model(model_dir_path, options)
+        self.model_input_shape = self._load_model(model_dir_path, options)
 
     @abstractmethod
-    def _load_model(self, model_dir_path: str, options: Dict):
+    def _load_model(self, model_dir_path: str, options: Dict) -> Tuple:
         """Load model
 
         Args:
             model_dir_path: Load model directory path
             options　: Load model options
+        Returns:
+            (numpy.ndarray) : A model input shape-(Batch, Height, Width, Channel) array
         """
         raise NotImplementedError()
 
     @classmethod
-    def preprocess(cls, input_tensor: np.ndarray, resize_input_shape: Tuple[int, int]) -> np.ndarray:
+    def preprocess(cls, input_tensor: np.ndarray, resize_input_shape: Tuple[int, int]) -> Tuple[np.ndarray, float]:
         """Preprocess
 
         Args:
@@ -160,6 +162,7 @@ class BaseModel(metaclass=ABCMeta):
             resize_input_shape : Resize size (Height, Width)
         Returns:
             (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
+            (float): A resized scale
         Raises:
             ValueError: If dimension mismatch or dtype mismatch
         """
@@ -171,6 +174,8 @@ class BaseModel(metaclass=ABCMeta):
 
         output_tensor = np.zeros((input_tensor.shape[0], *resize_input_shape, input_tensor.shape[3]),
                                  dtype=input_tensor.dtype)
+        resized_scale = min(resize_input_shape[1] / input_tensor.shape[2],
+                            resize_input_shape[0] / input_tensor.shape[1])
         for index, image in enumerate(input_tensor):
             pil_image = Image.fromarray(image)
             x_ratio, y_ratio = resize_input_shape[1] / pil_image.width, resize_input_shape[0] / pil_image.height
@@ -181,7 +186,7 @@ class BaseModel(metaclass=ABCMeta):
             resize_pil_image = pil_image.resize(resize_size)
             output_image = np.array(resize_pil_image)
             output_tensor[index, :output_image.shape[0], :output_image.shape[1], :] = output_image
-        return output_tensor
+        return output_tensor, (resize_input_shape[1] / resized_scale, resize_input_shape[0] / resized_scale)
 
     def predict(self, input_tensor: np.ndarray, score_th: float = 0.2, iou_th: float = 0.5,
                 white_classes_filter: bool = True) -> List[Dict]:
@@ -196,7 +201,8 @@ class BaseModel(metaclass=ABCMeta):
         Returns:
             (list): ex. Base.DTO
         """
-        dto = self._predict(input_tensor)
+        resize_input_tensor, resized_scale = self.preprocess(input_tensor, (self.model_input_shape[1], self.model_input_shape[2]))
+        dto = self._predict(resize_input_tensor)
         dto = self.__filter_limit(dto)
         if score_th is not None:
             dto = self.__filter_by_score(dto, score_th)
@@ -204,14 +210,16 @@ class BaseModel(metaclass=ABCMeta):
             dto = self.__filter_by_white_classes(dto)
         if iou_th is not None:
             dto = self.__nms(dto, iou_th)
+        dto = self.__convert_resized_scale(dto, resized_scale, input_tensor.shape)
+        dto = self.__filter_limit(dto)
         return dto
 
     @abstractmethod
-    def _predict(self, input_tensor: np.ndarray) -> List[Dict]:
+    def _predict(self, resize_input_tensor: np.ndarray) -> List[Dict]:
         """Predict
 
         Args:
-            input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
+            resize_input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
 
         Returns:
             (list): ex. Base.DTO
@@ -221,6 +229,16 @@ class BaseModel(metaclass=ABCMeta):
     @property
     def meta_dict(self):
         return self.__meta_dict
+
+    @classmethod
+    def __convert_resized_scale(cls, dto, resized_scale, input_tensor_shape):
+        boxes, scores, classes, box_nums, _ = cls.split_dto(dto)
+        boxes[:, :, 0] = (boxes[:, :, 0] * resized_scale[0]) / input_tensor_shape[1]
+        boxes[:, :, 1] = (boxes[:, :, 1] * resized_scale[1]) / input_tensor_shape[2]
+        boxes[:, :, 2] = (boxes[:, :, 2] * resized_scale[0]) / input_tensor_shape[1]
+        boxes[:, :, 3] = (boxes[:, :, 3] * resized_scale[1]) / input_tensor_shape[2]
+        dto = cls.__replace_dto(dto, boxes, scores, classes, box_nums)
+        return dto
 
     @classmethod
     def __filter_limit(cls, dto):
