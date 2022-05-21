@@ -53,6 +53,11 @@ class BaseModel(metaclass=ABCMeta):
                               "key": "detection",
                               "type": "box",
                               "extra": {
+                                "details":[
+                                "y1_ratio",
+                                "x1_ratio",
+                                "y2_ratio",
+                                "x2_ratio",
                               }
                             },
                             {
@@ -177,33 +182,3 @@ class BaseModel(metaclass=ABCMeta):
     @property
     def meta_dict(self):
         return self.__meta_dict
-
-    @classmethod
-    def calculate_euclidean_distance(cls, query_feature_array: np.ndarray, dst_feature_array: np.ndarray) -> np.ndarray:
-        """Calculate euclid distance between src_feature_array and dst_feature_array.
-
-        Args:
-            query_feature_array (numpy.ndarray) : A shape-(Dimension, ) array
-            dst_feature_array (numpy.ndarray) : A shape-(Batch,Dimension, ) array
-
-        Returns:
-            (numpy.ndarray): A shape-(Batch, ) array of the pairwise distances
-        """
-        distances = np.linalg.norm(dst_feature_array - query_feature_array, axis=1)
-        return distances
-
-    @classmethod
-    def calculate_cosine_distance(cls, query_feature_array: np.ndarray, dst_feature_array: np.ndarray) -> np.ndarray:
-        """Calculate cosine distance between src_feature_array and dst_feature_array.
-
-        Args:
-            query_feature_array (numpy.ndarray) : A shape-(Dimension, ) array
-            dst_feature_array (numpy.ndarray) : A shape-(Batch, Dimension) array
-
-        Returns:
-            (numpy.ndarray): A shape-(Batch, ) array of the pairwise distances
-        """
-
-        distances = np.dot(dst_feature_array, query_feature_array) / (
-                np.linalg.norm(dst_feature_array, axis=1) * np.linalg.norm(query_feature_array))
-        return np.minimum(1., np.maximum(0., 1 - distances))
