@@ -110,5 +110,7 @@ class TrtModel(BaseModel):
     def __output_tensor_list2dto(self, output_tensor_list: List[np.ndarray]) -> List[Dict]:
         dto = copy.deepcopy(self.meta_dict['output_dto'])
         for dto_index, dto_elem in enumerate(dto):
+            if 'np_ops' in dto_elem['extra'].keys() and dto_elem['extra']['np_ops'] == 'squeeze':
+                output_tensor_list[dto_index] = np.squeeze(output_tensor_list[dto_index], axis=-1)
             dto_elem['predicts'] = output_tensor_list[dto_index]
         return dto
