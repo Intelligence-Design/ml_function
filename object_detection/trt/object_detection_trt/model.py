@@ -67,7 +67,7 @@ class TrtModel(BaseModel):
         assert len(self.outputs) > 0
         assert len(self.allocations) > 0
 
-    def predict(self, input_tensor: np.ndarray) -> List[Dict]:
+    def _predict(self, input_tensor: np.ndarray) -> List[Dict]:
         if len(input_tensor.shape) != 4:
             raise ValueError('dimension mismatch')
         if not np.issubdtype(input_tensor.dtype, np.uint8):
