@@ -66,7 +66,8 @@ class TfliteModel(BaseModel):
         for index in range(len(output_details)):
             output = self.interpreter.get_tensor(output_details[index]['index'])
             scale, zero_point = output_details[index]['quantization']
-            output = scale * (output - zero_point)
+            if scale > 1e-4:
+                output = scale * (output - zero_point)
             output_tensor.append(output)
         return output_tensor
 
@@ -76,7 +77,13 @@ class TfliteModel(BaseModel):
             dto_elem['predicts'] = np.zeros((len(output_tensor_list), *output_tensor_list[0][dto_index].shape[1:]),
                                             dtype=output_tensor_list[0][dto_index].dtype)
 
-        for output_tensor in output_tensor_list:
-            for dto_index, dto_elem in enumerate(dto):
-                dto_elem['predicts'][dto_index] = output_tensor[dto_index]
+        concatenate_output_tensor_list = []
+        for dto_index in range(len(dto)):
+            concatenate_output_tensor_list_elem = []
+            for output_tensor in output_tensor_list:
+                concatenate_output_tensor_list_elem.extend(output_tensor[dto_index])
+            concatenate_output_tensor_list.append(np.array(concatenate_output_tensor_list_elem))
+
+        for dto_index, dto_elem in enumerate(dto):
+            dto_elem['predicts'] = concatenate_output_tensor_list[dto_index]
         return dto
