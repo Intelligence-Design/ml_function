@@ -10,14 +10,14 @@ try:
 except ImportError:
     from tensorflow.lite.python import interpreter as tflite
 
-from object_attribute_base.model import BaseModel
+from object_detection_base.model import BaseModel
 
 
 class TfliteModel(BaseModel):
-    """TfliteModel class for object_attribute.
+    """TfliteModel class for object_detection.
 
     Args:
-        model_dir_path: Load model directory path. Ref.BaseModel
+        model_dir_path: Load model directory path. Ref. BaseModel
         options　: Load model options
                      Example.
                         {'num_threads': 8}
