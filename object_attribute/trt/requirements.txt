@@ -1,2 +1,2 @@
-object-attribute-base @ git+ssh://git@github.com/Intelligence-Design/ml_function.git@feature/first#subdirectory=object_attribute/base
+object-attribute-base @ git+ssh://git@github.com/Intelligence-Design/ml_function.git@6e432cfce99d118963fad01352e51a5a17f4b724#subdirectory=object_attribute/base
 pycuda>=2020.1
