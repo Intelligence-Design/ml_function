@@ -188,7 +188,7 @@ class BaseModel(metaclass=ABCMeta):
             output_tensor[index, :output_image.shape[0], :output_image.shape[1], :] = output_image
         return output_tensor, (resize_input_shape[1] / resized_scale, resize_input_shape[0] / resized_scale)
 
-    def predict(self, input_tensor: np.ndarray, score_th: float = 0.2, iou_th: float = 0.5,
+    def predict(self, input_tensor: np.ndarray, score_th: float = 0.2, iou_th: float = 0.5, size_th: float = None,
                 white_classes_filter: bool = True) -> List[Dict]:
         """Predict
 
@@ -196,12 +196,14 @@ class BaseModel(metaclass=ABCMeta):
             input_tensor (numpy.ndarray) : A shape-(Batch, Height, Width, Channel) array
             score_th: Score threshold. if None, ignore
             iou_th: IoU for nms. if None, ignore
+            size_th: Size threshold. if None, 1/max(input_tensor[1], input_tensor[2])
             white_classes_filter: white classes filter.  if None, ignore
 
         Returns:
             (list): ex. Base.DTO
         """
-        resize_input_tensor, resized_scale = self.preprocess(input_tensor, (self.model_input_shape[1], self.model_input_shape[2]))
+        resize_input_tensor, resized_scale = self.preprocess(input_tensor,
+                                                             (self.model_input_shape[1], self.model_input_shape[2]))
         dto = self._predict(resize_input_tensor)
         dto = self.__filter_limit(dto)
         if score_th is not None:
@@ -210,6 +212,9 @@ class BaseModel(metaclass=ABCMeta):
             dto = self.__filter_by_white_classes(dto)
         if iou_th is not None:
             dto = self.__nms(dto, iou_th)
+        if size_th is None:
+            size_th = 1 / max((self.model_input_shape[1], self.model_input_shape[2]))
+        dto = self.__filter_resized_scale(dto, resized_scale, size_th)
         dto = self.__convert_resized_scale(dto, resized_scale, input_tensor.shape)
         dto = self.__filter_limit(dto)
         return dto
@@ -229,6 +234,39 @@ class BaseModel(metaclass=ABCMeta):
     @property
     def meta_dict(self):
         return self.__meta_dict
+
+    @classmethod
+    def __filter_resized_scale(cls, dto, resized_scale, size_th):
+        def __filter(bboxes, scores, classes, box_nums, pixel_th=0):
+            if int(box_nums) == 0:
+                return bboxes, scores, classes, box_nums
+            filter_bboxes = np.zeros(bboxes.shape, bboxes.dtype)
+            filter_scores = np.zeros(scores.shape, scores.dtype)
+            filter_classes = np.zeros(classes.shape, classes.dtype)
+            mask = (np.abs(bboxes[:, 0]-bboxes[:, 2]) > size_th) & (np.abs(bboxes[:, 1]-bboxes[:, 3]) > size_th)
+            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask[:int(box_nums)]], \
+                                                     scores[:int(box_nums)][mask[:int(box_nums)]], \
+                                                     classes[:int(box_nums)][mask[:int(box_nums)]]
+            filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
+            filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
+            filter_classes[:mask_classes.shape[0]] = mask_classes.astype(filter_classes.dtype)
+            filter_box_nums = len(mask_bboxes)
+            return filter_bboxes, filter_scores, filter_classes, filter_box_nums
+
+        boxes, scores, classes, box_nums, _ = cls.split_dto(dto)
+        filter_boxes_list, filter_scores_list, filter_classes_list, filter_box_nums_list = [], [], [], []
+        for index in range(boxes.shape[0]):
+            filter_boxes, filter_scores, filter_classes, filter_box_nums = __filter(boxes[index], scores[index],
+                                                                                    classes[index], box_nums[index],
+                                                                                    size_th)
+            filter_boxes_list.append(filter_boxes)
+            filter_scores_list.append(filter_scores)
+            filter_classes_list.append(filter_classes)
+            filter_box_nums_list.append(filter_box_nums)
+
+        dto = cls.__replace_dto(dto, np.asarray(filter_boxes_list), np.asarray(filter_scores_list),
+                                np.asarray(filter_classes_list), np.asarray(filter_box_nums_list))
+        return dto
 
     @classmethod
     def __convert_resized_scale(cls, dto, resized_scale, input_tensor_shape):
@@ -256,7 +294,8 @@ class BaseModel(metaclass=ABCMeta):
             filter_scores = np.zeros(scores.shape, scores.dtype)
             filter_classes = np.zeros(classes.shape, classes.dtype)
             mask = scores > score_th
-            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask[:int(box_nums)]], scores[:int(box_nums)][mask[:int(box_nums)]], \
+            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][mask[:int(box_nums)]], \
+                                                     scores[:int(box_nums)][mask[:int(box_nums)]], \
                                                      classes[:int(box_nums)][mask[:int(box_nums)]]
             filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
             filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
@@ -289,7 +328,8 @@ class BaseModel(metaclass=ABCMeta):
             mask = np.zeros(classes.shape, np.bool)
             for white_classes_index in white_classes_indexes:
                 mask = mask | (classes.astype(np.int) == white_classes_index)
-            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][[mask[:int(box_nums)]]], scores[:int(box_nums)][[mask[:int(box_nums)]]], \
+            mask_bboxes, mask_scores, mask_classes = bboxes[:int(box_nums)][[mask[:int(box_nums)]]], \
+                                                     scores[:int(box_nums)][[mask[:int(box_nums)]]], \
                                                      classes[:int(box_nums)][[mask[:int(box_nums)]]]
             filter_bboxes[:mask_bboxes.shape[0], :mask_bboxes.shape[1]] = mask_bboxes.astype(filter_bboxes.dtype)
             filter_scores[:mask_scores.shape[0]] = mask_scores.astype(filter_scores.dtype)
