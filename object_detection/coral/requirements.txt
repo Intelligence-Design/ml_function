@@ -1,1 +1,1 @@
-object-attribute-tflite @ git+ssh://git@github.com/Intelligence-Design/ml_function.git@feature/first#subdirectory=object_attribute/tflite
+object-attribute-tflite @ git+ssh://git@github.com/Intelligence-Design/ml_function.git@3ba742cf587aa859bd0e7c8e4384445eba61a466#subdirectory=object_attribute/tflite
