@@ -35,6 +35,8 @@ def s3_cp_unzip(s3_zip_path: str, output_dir_path: str, extra_arg: Dict = None) 
         bucket_name = s3_zip_path.split('/')[2]
         key_name = '/'.join(s3_zip_path.split('/')[3:])
         bucket = s3.Bucket(bucket_name)
+        output_dir_path = os.path.join(output_dir_path, os.path.splitext(os.path.basename(key_name))[0])
+        os.makedirs(output_dir_path)
         output_zip_path = os.path.join(output_dir_path, os.path.basename(key_name))
         if not os.path.exists(output_zip_path):
             bucket.download_file(key_name, output_zip_path, ExtraArgs=extra_arg)
