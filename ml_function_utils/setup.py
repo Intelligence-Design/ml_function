@@ -32,7 +32,7 @@ if __name__ == '__main__':
         long_description_content_type="text/markdown",
         packages=setuptools.find_packages(),
         classifiers=[
-            "Programming Language :: Python :: 3.8.7",
+            "Programming Language :: Python :: 3.6.9",
             "No License :: No Approved :: No License",
             "Operating System :: OS Independent",
         ],
