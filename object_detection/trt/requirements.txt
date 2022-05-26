@@ -1,0 +1,2 @@
+object-detection-base @ git+ssh://git@github.com/Intelligence-Design/ml_function.git@e0f2c6d30bff2429ea3d7eaf00368ebbe7c8c892#subdirectory=object_detection/base
+pycuda>=2020.1
