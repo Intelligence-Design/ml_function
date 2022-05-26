@@ -38,5 +38,5 @@ sudo docker run --runtime nvidia \
            -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} \
             --name object_detection_trt_container \
             --rm -i -t object_detection_trt
-python3 -m object_detection_trt.test_model_g4dn_xlarge
+python3 -m unittest object_detection_trt.test_model_g4dn_xlarge.py
 ```

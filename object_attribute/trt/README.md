@@ -38,5 +38,5 @@ sudo docker run --runtime nvidia \
            -e AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} \
             --name object_attribute_trt_container \
             --rm -i -t object_attribute_trt
-python3 -m object_attribute_trt.test_model_g4dn_xlarge
+python3 -m unittest object_attribute_trt.test_model_g4dn_xlarge.py
 ```
